@@ -1,45 +1,61 @@
 import socket
+import json
 
-def send_request(request_line, headers_list=None):
+def send_request(method, path, body=None):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 8080))
 
-    request = f'{request_line}\r\n'
+    request = f'{method} {path} HTTP/1.1\r\n'
     request += 'Host: localhost\r\n'
     
-    if headers_list:
-        for header in headers_list:
-            request += f'{header}\r\n'
-            
+    if body:
+        json_str = json.dumps(body)
+        request += 'Content-Type: application/json\r\n'
+        request += f'Content-Length: {len(json_str)}\r\n'
+    
     request += '\r\n'
     
+    if body:
+        request += json_str
+
     client_socket.send(request.encode())
 
     response = client_socket.recv(4096).decode()
+    print(f"ENVIANDO {method} {path}")
+    if body:
+        print(f"Body: {body}")
+    print("\nRespuesta: ")
     print(response)
+    print()
 
     client_socket.close()
 
-print()
-print("Prueba 1: Ruta raíz")
-send_request('GET / HTTP/1.1')
-print()
+# pruebas :v
 
-print("Prueba 2: Ruta /api")
-send_request('GET /api HTTP/1.1')
-print()
+# 1. Insertar un sensor correctamente
+sensor_1 = {
+    "sensor_id": "S001",
+    "name": "Temperatura",
+    "value": 25.5,
+    "unit": "C",
+    "location": "Lab 1"
+}
+send_request('POST', '/api/sensors', body=sensor_1)
 
-print("Prueba 3: Ruta /admin (Token correcto)")
-send_request('GET /admin HTTP/1.1', headers_list=["Authorization: {token:1234}"])
-print()
+# 2. Intentar insertar el mismo sensor
+send_request('POST', '/api/sensors', body=sensor_1)
 
-print("Prueba 4: Ruta /admin (Token incorrecto)")
-send_request('GET /admin HTTP/1.1', headers_list=["Authorization: token-malo"])
-print()
+# 3. Insertar otro sensor
+sensor_2 = {
+    "sensor_id": "S002",
+    "name": "Humedad",
+    "value": 60
+}
+send_request('POST', '/api/sensors', body=sensor_2)
 
-print("Prueba 5: Ruta /admin (Sin token)")
-send_request('GET /admin HTTP/1.1')
-print()
-
-print("Prueba 6: Ruta que no existe")
-send_request('GET /hola HTTP/1.1')
+# 4. JSON incompleto
+sensor_malo = {
+    "sensor_id": "S003",
+    "name": "Presion"
+}
+send_request('POST', '/api/sensors', body=sensor_malo)
