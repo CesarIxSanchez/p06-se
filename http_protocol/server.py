@@ -52,11 +52,18 @@ def start_server():
                 sensors_db.append(new_sensor)
                 print(f"Guardado en DB. Total sensores: {len(sensors_db)}")
 
-                # HANDOFF: pendiente, implementar:
-                # - Código de Estado 201 Created
-                # - Estructura de Respuesta con el JSON del recurso creado
+                # --- INICIO DE MI PARTE (Puntos 3 y 4) ---
+                # Punto 4: Estructura con mensaje y recurso completo 
+                response_body = {
+                    "message": "Sensor creado exitosamente",
+                    "sensor": new_sensor 
+                }
                 
-                return send_http_response(201, 'Exito')
+                json_content = json.dumps(response_body)
+
+                # Punto 3: Retornar 201 Created 
+                return send_http_response(201, json_content, content_type='application/json')
+                # --- FIN DE MI PARTE ---
 
         return send_http_response(404, 'Not found')
         
