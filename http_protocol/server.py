@@ -33,6 +33,13 @@ def start_server():
                     if field not in data:
                         return send_http_response(400, f'Error: Falta el campo {field}')
 
+                if not isinstance(data['sensor_id'], str) or not isinstance(data['name'], str):
+                    return send_http_response(400, '{"error": "sensor_id y name deben ser strings"}', 'application/json')
+                    
+               
+                if not isinstance(data['value'], (int, float)):
+                    return send_http_response(400, '{"error": "value debe ser numérico"}', 'application/json')
+
                 for sensor in sensors_db:
                     if sensor['sensor_id'] == data['sensor_id']:
                         return send_http_response(409, 'Error: El sensor_id ya existe')
