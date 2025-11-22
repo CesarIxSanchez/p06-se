@@ -1,12 +1,16 @@
 import socket
 import json
 
-def send_request(method, path, body=None):
+def send_request(method, path, body=None, headers=None):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 8080))
 
     request = f'{method} {path} HTTP/1.1\r\n'
     request += 'Host: localhost\r\n'
+
+    if headers:
+        for key, value in headers.items():
+            request += f'{key}: {value}\r\n'
     
     if body:
         json_str = json.dumps(body)
@@ -29,6 +33,9 @@ def send_request(method, path, body=None):
     print()
 
     client_socket.close()
+
+#esto lo puse para generar el archivo .json, si no es necesario luego lo quitan
+    return response
 
 # pruebas :v
 
@@ -59,3 +66,30 @@ sensor_malo = {
     "name": "Presion"
 }
 send_request('POST', '/api/sensors', body=sensor_malo)
+
+#Pruebas DELETE :
+
+# 1.Sin autenticación
+print("DELETE-Error 401")
+send_request('DELETE', '/api/sensors/S001')
+
+# 2. Con autenticación pero ID incorrecto
+print("DELETE-Error 404")
+headers_auth = {"Authorization": "Bearer 1234"}
+send_request('DELETE', '/api/sensors/S999', headers=headers_auth)
+
+# 3. Correcto
+print("Delecte-Succes 200")
+response = send_request('DELETE', '/api/sensors/S001', headers=headers_auth)
+
+
+
+
+#Generar archivo json (no se si checará esto)
+try:
+    json_content = response.split('\r\n\r\n')[1] 
+    with open('respuesta_servidor.json', 'w') as archivo:
+        archivo.write(json_content)
+    print("Archivo de respuesta guardado 'respuesta_servidor.json'")
+except:
+    print("No se pudo guardar el archivo")
