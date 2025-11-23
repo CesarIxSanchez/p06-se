@@ -65,6 +65,40 @@ def start_server():
                 return send_http_response(201, json_content, content_type='application/json')
                 # --- FIN DE MI PARTE ---
 
+
+                # Método DELETE
+        elif path.startswith('/api/sensors/'):
+            
+            if method == 'DELETE':
+              
+                try:
+                    sensor_id = path.split('/')[-1] 
+                except IndexError:
+                    return send_http_response(400, '{"error": "ID invalido"}', 'application/json')
+
+                auth_token = headers.get('Authorization')
+                if auth_token != "Bearer 1234":
+                    return send_http_response(401, '{"error": "Unauthorized: Token/ID invalido o ausente"}', 'application/json')
+                
+                sensor_encontrado = None
+                for sensor in sensors_db:
+                    if sensor['sensor_id'] == sensor_id:
+                        sensor_encontrado = sensor
+                        break
+                
+                if not sensor_encontrado:
+                    return send_http_response(404, '{"error": "Not Found: El sensor no existe"}', 'application/json')
+
+                sensors_db.remove(sensor_encontrado)
+                
+                # Estructura de Respuesta Exitosa 
+                respuesta = {
+                    "message": "Sensor eliminado",
+                    "deleted_id": sensor_id,
+                    "timestamp": datetime.datetime.now().isoformat()
+                }
+                return send_http_response(200, json.dumps(respuesta), 'application/json')
+
         return send_http_response(404, 'Not found')
         
     try:

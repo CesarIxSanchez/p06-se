@@ -1,7 +1,7 @@
 import socket
 import json
 
-def send_request(method, path, body=None):
+def send_request(method, path, body=None, headers=None):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 8080))
 
@@ -59,3 +59,18 @@ sensor_malo = {
     "name": "Presion"
 }
 send_request('POST', '/api/sensors', body=sensor_malo)
+
+#Pruebas DELETE :
+
+# 1.Sin autenticación
+print("DELETE-Error 401")
+send_request('DELETE', '/api/sensors/S001')
+
+# 2. Con autenticación pero ID incorrecto
+print("DELETE-Error 404")
+headers_auth = {"Authorization": "Bearer 1234"}
+send_request('DELETE', '/api/sensors/S999', headers=headers_auth)
+
+# 3. Correcto
+print("Delecte-Succes 200")
+send_request('DELETE', '/api/sensors/S001', headers=headers_auth)
