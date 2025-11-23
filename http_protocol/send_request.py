@@ -7,6 +7,10 @@ def send_request(method, path, body=None, headers=None):
 
     request = f'{method} {path} HTTP/1.1\r\n'
     request += 'Host: localhost\r\n'
+
+    if headers:
+        for key, value in headers.items():
+            request += f'{key}: {value}\r\n'
     
     if body:
         json_str = json.dumps(body)
@@ -29,6 +33,9 @@ def send_request(method, path, body=None, headers=None):
     print()
 
     client_socket.close()
+
+#esto lo puse para generar el archivo .json, si no es necesario luego lo quitan
+    return response
 
 # pruebas :v
 
