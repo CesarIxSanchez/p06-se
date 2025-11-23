@@ -80,16 +80,4 @@ send_request('DELETE', '/api/sensors/S999', headers=headers_auth)
 
 # 3. Correcto
 print("Delecte-Succes 200")
-response = send_request('DELETE', '/api/sensors/S001', headers=headers_auth)
-
-
-
-
-#Generar archivo json (no se si checará esto)
-try:
-    json_content = response.split('\r\n\r\n')[1] 
-    with open('respuesta_servidor.json', 'w') as archivo:
-        archivo.write(json_content)
-    print("Archivo de respuesta guardado 'respuesta_servidor.json'")
-except:
-    print("No se pudo guardar el archivo")
+send_request('DELETE', '/api/sensors/S001', headers=headers_auth)
