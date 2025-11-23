@@ -11,6 +11,7 @@ def start_server():
     port = 8080
     server_socket.bind((host, port))
     server_socket.listen(5)
+    print(f"Servidor escuchando en {host}:{port}")
 
     def handler_path(method, path_with_query, headers, body):
         parsed_url = urlparse(path_with_query)
@@ -52,46 +53,43 @@ def start_server():
                 sensors_db.append(new_sensor)
                 print(f"Guardado en DB. Total sensores: {len(sensors_db)}")
 
-                # --- INICIO DE MI PARTE (Puntos 3 y 4) ---
-                # Punto 4: Estructura con mensaje y recurso completo 
+                # (POST: Puntos 3 y 4)
                 response_body = {
                     "message": "Sensor creado exitosamente",
                     "sensor": new_sensor 
                 }
                 
                 json_content = json.dumps(response_body)
-
-                # Punto 3: Retornar 201 Created 
                 return send_http_response(201, json_content, content_type='application/json')
-                # --- FIN DE MI PARTE ---
 
 
-                # Método DELETE
+        # Método DELETE (Manejando sub-rutas con ID)
         elif path.startswith('/api/sensors/'):
             
             if method == 'DELETE':
-              
+                
+                # DELETE: Puntos 1 y 2
+                # 1. Procesamiento de la Petición
                 try:
                     sensor_id = path.split('/')[-1] 
                 except IndexError:
                     return send_http_response(400, '{"error": "ID invalido"}', 'application/json')
-
                 auth_token = headers.get('Authorization')
                 if auth_token != "Bearer 1234":
-                    return send_http_response(401, '{"error": "Unauthorized: Token/ID invalido o ausente"}', 'application/json')
-                
+                    return send_http_response(401, '{"error": "Unauthorized: Token invalido o ausente"}', 'application/json')
+                # 2. Lógica de Negocio
                 sensor_encontrado = None
                 for sensor in sensors_db:
                     if sensor['sensor_id'] == sensor_id:
                         sensor_encontrado = sensor
-                        break
-                
+                        break                
                 if not sensor_encontrado:
                     return send_http_response(404, '{"error": "Not Found: El sensor no existe"}', 'application/json')
-
                 sensors_db.remove(sensor_encontrado)
-                
-                # Estructura de Respuesta Exitosa 
+                print(f"Sensor {sensor_id} eliminado. Restantes: {len(sensors_db)}")
+
+                # DELETE: Puntos 3 y 4
+                # Estructura de Respuesta Exitosa y Código 200
                 respuesta = {
                     "message": "Sensor eliminado",
                     "deleted_id": sensor_id,
